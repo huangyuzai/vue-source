@@ -45,7 +45,7 @@ const mockDep = {
  * object's property keys into getter/setters that
  * collect dependencies and dispatch updates.
  */
-export class Observer {
+export class Observer { // 定义一个监视器类
   dep: Dep
   vmCount: number // number of vms that have this object as root $data
 
@@ -53,8 +53,8 @@ export class Observer {
     // this.value = value
     this.dep = mock ? mockDep : new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this)
-    if (isArray(value)) {
+    def(value, '__ob__', this) // 在数据对象上新增一个 __ob__ 属性，并且设置为不可被枚举
+    if (isArray(value)) { // 判断数据对象是否为数组，数组监听需要进行深层次的对象劫持
       if (!mock) {
         if (hasProto) {
           /* eslint-disable no-proto */
@@ -63,6 +63,7 @@ export class Observer {
         } else {
           for (let i = 0, l = arrayKeys.length; i < l; i++) {
             const key = arrayKeys[i]
+            // 分别对每个属性进行劫持
             def(value, key, arrayMethods[key])
           }
         }
@@ -77,8 +78,10 @@ export class Observer {
        * value type is Object.
        */
       const keys = Object.keys(value)
+      /* 循环遍历所有对象属性，一一进行劫持 */
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
+        // 循环每个属性进行劫持
         defineReactive(value, key, NO_INIITIAL_VALUE, undefined, shallow, mock)
       }
     }
@@ -106,14 +109,14 @@ export function observe(
   shallow?: boolean,
   ssrMockReactivity?: boolean
 ): Observer | void {
-  if (value && hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+  if (value && hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) { // 如果数据已经被劫持过了，则不进行处理，直接返回该对象
     return value.__ob__
   }
   if (
-    shouldObserve &&
+    shouldObserve && /* 能否被观测 */
     (ssrMockReactivity || !isServerRendering()) &&
     (isArray(value) || isPlainObject(value)) &&
-    Object.isExtensible(value) &&
+    Object.isExtensible(value) && /* 这个对象必须能被扩展 */
     !value.__v_skip /* ReactiveFlags.SKIP */ &&
     !isRef(value) &&
     !(value instanceof VNode)
@@ -134,7 +137,7 @@ export function defineReactive(
   mock?: boolean
 ) {
   const dep = new Dep()
-
+  // 判断 obj 对象上是否存在自身的 key，不是原型上的
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
@@ -150,7 +153,7 @@ export function defineReactive(
     val = obj[key]
   }
 
-  let childOb = !shallow && observe(val, false, mock)
+  let childOb = !shallow && observe(val, false, mock) // 递归观测
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,

@@ -39,33 +39,35 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+/* 数据代理 */
 export function proxy(target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter() {
-    return this[sourceKey][key]
+    return this[sourceKey][key] // 返回原数据对象的值
   }
   sharedPropertyDefinition.set = function proxySetter(val) {
-    this[sourceKey][key] = val
+    this[sourceKey][key] = val // 设置原数据对象的值
   }
-  Object.defineProperty(target, key, sharedPropertyDefinition)
+  Object.defineProperty(target, key, sharedPropertyDefinition) // 使用 Object.defineProperty 进行数据劫持
 }
 
+/* 初始化 state */
 export function initState(vm: Component) {
   const opts = vm.$options
-  if (opts.props) initProps(vm, opts.props)
+  if (opts.props) initProps(vm, opts.props) // 如果存在 propss，则调用初始化 props 的方法
 
   // Composition API
-  initSetup(vm)
+  initSetup(vm) // 初始化 setup
 
-  if (opts.methods) initMethods(vm, opts.methods)
+  if (opts.methods) initMethods(vm, opts.methods) // 初始化 methods 中的方法
   if (opts.data) {
-    initData(vm)
+    initData(vm) // 如果存在data数据，则初始化data数据
   } else {
-    const ob = observe((vm._data = {}))
+    const ob = observe((vm._data = {})) // 如果用户没有传递，则新添加一个默认空对象
     ob && ob.vmCount++
   }
-  if (opts.computed) initComputed(vm, opts.computed)
+  if (opts.computed) initComputed(vm, opts.computed) // 初始化 computed
   if (opts.watch && opts.watch !== nativeWatch) {
-    initWatch(vm, opts.watch)
+    initWatch(vm, opts.watch) // 初始化 watch
   }
 }
 
@@ -119,9 +121,12 @@ function initProps(vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+/* 初始化 data 数据 */
 function initData(vm: Component) {
   let data: any = vm.$options.data
+  /* 判断用户传进来的 data 是方法类型还是对象类型，将在实例上挂载一个 _data 对象，方便读取数据 */
   data = vm._data = isFunction(data) ? getData(data, vm) : data || {}
+  /* 如果 data 函数返回来的不是一个对象，则会直接报错 */
   if (!isPlainObject(data)) {
     data = {}
     __DEV__ &&
@@ -151,11 +156,12 @@ function initData(vm: Component) {
           vm
         )
     } else if (!isReserved(key)) {
+      // 对数据进行代理，将 vm.xxx 的访问形式代理到 vm._data.xxx 上进行操作
       proxy(vm, `_data`, key)
     }
   }
   // observe data
-  const ob = observe(data)
+  const ob = observe(data) // 对数据进行劫持
   ob && ob.vmCount++
 }
 
@@ -163,7 +169,7 @@ export function getData(data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
   try {
-    return data.call(vm, vm)
+    return data.call(vm, vm) // 调用方法，并将方法的结果返回
   } catch (e: any) {
     handleError(e, vm, `data()`)
     return {}

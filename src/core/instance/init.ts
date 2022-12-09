@@ -14,6 +14,7 @@ import { EffectScope } from 'v3/reactivity/effectScope'
 let uid = 0
 
 export function initMixin(Vue: typeof Component) {
+  // 挂载一个初始化用户参数的实例方法 _init
   Vue.prototype._init = function (options?: Record<string, any>) {
     const vm: Component = this
     // a uid
