@@ -57,13 +57,13 @@ export function initMixin(Vue: typeof Component) {
     }
     // expose real self
     vm._self = vm
-    initLifecycle(vm)
-    initEvents(vm)
-    initRender(vm)
+    initLifecycle(vm) // 初始化生命周期
+    initEvents(vm) // 初始化事件 $on $emit $once
+    initRender(vm) //
     callHook(vm, 'beforeCreate', undefined, false /* setContext */)
-    initInjections(vm) // resolve injections before data/props
-    initState(vm)
-    initProvide(vm) // resolve provide after data/props
+    initInjections(vm) // resolve injections before data/props    // inject 方法
+    initState(vm) // 响应式处理
+    initProvide(vm) // resolve provide after data/props // provide 方法
     callHook(vm, 'created')
 
     /* istanbul ignore if */

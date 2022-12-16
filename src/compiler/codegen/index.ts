@@ -83,7 +83,7 @@ export function genElement(el: ASTElement, state: CodegenState): string {
   } else if (el.for && !el.forProcessed) {
     return genFor(el, state)
   } else if (el.if && !el.ifProcessed) {
-    return genIf(el, state)
+    return genIf(el, state) // 处理 v-if
   } else if (el.tag === 'template' && !el.slotTarget && !state.pre) {
     return genChildren(el, state) || 'void 0'
   } else if (el.tag === 'slot') {
@@ -221,6 +221,7 @@ function genIfConditions(
 
   const condition = conditions.shift()!
   if (condition.exp) {
+    /* 转译成三元表达式形式：“(flag)?_c('h2',[_v(_s(a))]):_e()” */
     return `(${condition.exp})?${genTernaryExp(
       condition.block
     )}:${genIfConditions(conditions, state, altGen, altEmpty)}`

@@ -6,9 +6,10 @@
 import { TriggerOpTypes } from '../../v3'
 import { def } from '../util/index'
 
-const arrayProto = Array.prototype
-export const arrayMethods = Object.create(arrayProto)
+const arrayProto = Array.prototype // 拿到数组原型方法
+export const arrayMethods = Object.create(arrayProto) //
 
+// 需要重写的数组方法
 const methodsToPatch = [
   'push',
   'pop',
@@ -25,10 +26,11 @@ const methodsToPatch = [
 methodsToPatch.forEach(function (method) {
   // cache original method
   const original = arrayProto[method]
+  /* 对数组相关方法进行重写 */
   def(arrayMethods, method, function mutator(...args) {
-    const result = original.apply(this, args)
+    const result = original.apply(this, args) // 调用原数组方法并导出
     const ob = this.__ob__
-    let inserted
+    let inserted // 用于存储用户传进来的参数，例如 arr.push({a: 1})
     switch (method) {
       case 'push':
       case 'unshift':
@@ -38,6 +40,7 @@ methodsToPatch.forEach(function (method) {
         inserted = args.slice(2)
         break
     }
+    /* 如果存在用户传进来的参数，则再次进行劫持 */
     if (inserted) ob.observeArray(inserted)
     // notify change
     if (__DEV__) {
@@ -49,6 +52,6 @@ methodsToPatch.forEach(function (method) {
     } else {
       ob.dep.notify()
     }
-    return result
+    return result // 将结果返回
   })
 })

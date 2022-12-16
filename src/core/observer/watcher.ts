@@ -124,6 +124,7 @@ export default class Watcher implements DepTarget {
           )
       }
     }
+    // 当页面视图更新时，会调用 get
     this.value = this.lazy ? undefined : this.get()
   }
 
@@ -131,6 +132,7 @@ export default class Watcher implements DepTarget {
    * Evaluate the getter, and re-collect dependencies.
    */
   get() {
+    /* 将当前 watcher 添加到数组中，后续调用 update 时使用 */
     pushTarget(this)
     let value
     const vm = this.vm
@@ -149,6 +151,7 @@ export default class Watcher implements DepTarget {
         traverse(value)
       }
       popTarget()
+      // 将 watcher 和 dep 关系进行一个清理，防止数据更新时更新所有数据源
       this.cleanupDeps()
     }
     return value
